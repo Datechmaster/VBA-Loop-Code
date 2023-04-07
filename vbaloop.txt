@@ -1,0 +1,121 @@
+'inside loop
+'round up 14 leads per day until exausted
+For Each cell In SendOut.Range("employee_list")
+
+    name = cell.Value
+    'MsgBox (cell.Value)
+
+    'set loop start
+    i = 2
+    'check row for both X and above name set
+    'LOOP whole collumn?
+    While i < 25376
+
+                'launch instance
+                'Create an Instance of MS Word
+                  On Error Resume Next
+
+                    'Is MS Word already opened?
+                      Set WordApp = GetObject(class:="Word.Application")
+
+                    'Create an Instance of MS Word
+                      On Error Resume Next
+
+                        'Is MS Word already opened?
+                          Set WordApp = GetObject(class:="Word.Application")
+
+                        'Clear the error between errors
+                          Err.Clear
+
+                        'If MS Word is not already open then open MS Word
+                          If WordApp Is Nothing Then Set WordApp = CreateObject(class:="Word.Application")
+
+                        'Handle if the Word Application is not found
+                          If Err.Number = 429 Then
+                            MsgBox "Microsoft Word could not be found, aborting."
+                            GoTo EndRoutine
+                          End If
+
+                      On Error GoTo 0
+
+                    'Make MS Word Visible and Active
+                      WordApp.Visible = True
+                      WordApp.Activate
+
+                    'Create a New Document
+                      Set myDoc = WordApp.Documents.Add
+                    '*************************
+
+
+            c1 = "S" & i
+            c2 = "X" & i
+            If COsheet.Range(c1).Value = cell.Value Then
+                If COsheet.Range(c2).Value = "X" Then
+                    'skip it's already been used
+                Else
+                    'add to array to print
+                    c3 = "C" & i & ":" & "I" & i
+
+                    'Copy Range from Excel
+                    Set tbl = ThisWorkbook.Worksheets(2).Range(c3)
+
+
+
+
+                    'REPEAT 14 leads AND X out on sheet
+                    n = 1
+                    While n < 15
+                    'Copy Excel Table Range
+                      tbl.Copy
+
+                    'Paste Table into MS Word
+                      myDoc.Paragraphs(1).Range.PasteExcelTable _
+                        LinkedToExcel:=False, _
+                        WordFormatting:=False, _
+                        RTF:=False
+
+                    'Autofit Table so it fits inside Word Document
+                      Set WordTable = myDoc.Tables(1)
+                      WordTable.AutoFitBehavior (wdAutoFitWindow)
+
+EndRoutine:
+                    'Optimize Code
+                      Application.ScreenUpdating = True
+                      Application.EnableEvents = True
+
+                    'Clear The Clipboard
+                      Application.CutCopyMode = False
+
+                      'X out that cell
+                      COsheet.Range(c2).Value = "X"
+                      n = n + 1
+
+                      'increases the X marked cell
+                      c2 = "X" + (i + 1)
+
+                    Wend
+
+
+
+
+
+
+
+
+
+                    'save and close
+                    tDate = Date
+                    fileName = "G:\My Drive\nwr\NWR 12-7 working folder\" & cell.Value & Format(tDate, "Medium Date") & ".docx"
+                    WordApp.ActiveDocument.SaveAs2 fileName, 16
+                    WordApp.Quit
+                End If
+        Else
+            'skip
+        End If
+
+        i = i + 1
+
+    Wend ' end while loop
+    'create word docs
+
+Next cell
